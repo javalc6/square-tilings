@@ -3,13 +3,15 @@ This Swing application provides an interactive graphical interface for visualizi
 
 *SquareTiling* includes tiles like Greek key, Islamic stars, octagons, checkers, tartan and interlaced motifs, which can be tiled across the application panel in real time. 
 
-Users can adjust tile size, choose from four customizable colors, preview individual tiles and export the resulting tiling as a PNG image. 
+You can adjust tile size, choose from four customizable colors, preview individual tiles and export the resulting tiling as a PNG image. 
+Create your own tile using *user mode* that allows you to draw lines, fill colors, to try your own tilings.
 
 # How to run
 Run 'ant' command to compile and run the *SquareTiling* application.
 
 # Screenshot
+Islamic tile example:
 ![Screenshot](images/screenshot.png)
 
-# TODO
-- build custom tiles
+User tile example:
+![Screenshot](images/user_mode.png)

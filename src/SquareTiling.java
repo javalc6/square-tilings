@@ -83,9 +83,12 @@ public class SquareTiling extends JFrame {
     private final JButton backBtn;
     private final JButton deleteBtn;
     private final JButton userBtn;
+    private final JButton helpBtn;
+    private final JButton galleryBtn;
     private final JComboBox<Color> colorComboBox;
+    private final JLabel sizeLabel;
+    private final JSlider sizeSlider;
 
-    private boolean isUserMode;
     private boolean isFillMode = false;
 
     // User Drawing Data
@@ -100,7 +103,6 @@ public class SquareTiling extends JFrame {
         setLocationRelativeTo(null);
 
         tilingPanel = new TilingPanel();
-        isUserMode = currentType == TileType.USER_MODE;
 
         JPanel topPanel = new JPanel();
         topPanel.setBackground(Color.DARK_GRAY);
@@ -120,8 +122,7 @@ public class SquareTiling extends JFrame {
         typeCombo.addActionListener(e -> {
             currentType = (TileType) typeCombo.getSelectedItem();
             tilingPanel.clearCache();
-            isUserMode = currentType == TileType.USER_MODE;
-            updateButtonVisibility();
+            updateUILayout();
             repaint();
         });
 
@@ -130,6 +131,9 @@ public class SquareTiling extends JFrame {
 
         JButton saveBtn = new JButton("Save Image");
         saveBtn.addActionListener(e -> saveImage());
+
+        galleryBtn = new JButton("Gallery");
+        galleryBtn.addActionListener(e -> showGallery(typeCombo));
 
         addControl(topPanel, "Tile Pattern:", typeCombo);
         topPanel.add(showTileBtn);
@@ -160,6 +164,15 @@ public class SquareTiling extends JFrame {
         });
         userBtn = new JButton("User Mode");
         userBtn.addActionListener(e -> typeCombo.setSelectedItem(TileType.USER_MODE));
+        helpBtn = new JButton("?");
+        helpBtn.addActionListener(e -> {
+            JOptionPane.showMessageDialog(
+                SquareTiling.this,
+                "Use mouse to draw lines and fill area.\nSelect mode by clicking either the line icon or the filler icon.\nIn line mode, left click and move mouse, a ghost line is shown, release button.\nIn filler mode, left click and release.\nFiller color can be changed in the selection list.\nUndo drawings by clicking back icon.\nClear drawing area by clicking X icon.",
+                "Help",
+                JOptionPane.INFORMATION_MESSAGE
+            );
+        });
 
         Color[] colors = {colorA, colorB, colorC, colorD};
         colorComboBox = new JComboBox<>(colors);
@@ -177,9 +190,9 @@ public class SquareTiling extends JFrame {
         topPanel.add(backBtn);
         topPanel.add(deleteBtn);
         topPanel.add(colorComboBox);
+        topPanel.add(helpBtn);
         topPanel.add(userBtn);
-
-        updateButtonVisibility();
+        topPanel.add(galleryBtn);
 
         JPanel sidebar = new JPanel();
         sidebar.setBackground(Color.DARK_GRAY);
@@ -187,11 +200,11 @@ public class SquareTiling extends JFrame {
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
         sidebar.setBorder(new EmptyBorder(20, 10, 10, 10));
 
-        JLabel sizeLabel = new JLabel("Tile Size");
+        sizeLabel = new JLabel("Tile Size");
         sizeLabel.setForeground(Color.WHITE);
         sizeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JSlider sizeSlider = new JSlider(JSlider.VERTICAL, 40, 400, 150);
+        sizeSlider = new JSlider(JSlider.VERTICAL, 40, 400, 150);
         sizeSlider.setBackground(Color.DARK_GRAY);
         sizeSlider.setAlignmentX(Component.CENTER_ALIGNMENT);
         sizeSlider.addChangeListener(e -> {
@@ -221,19 +234,27 @@ public class SquareTiling extends JFrame {
             sidebar.add(Box.createRigidArea(new Dimension(0, 10)));
         }
 
+        updateUILayout();
+
         add(topPanel, BorderLayout.NORTH);
         add(sidebar, BorderLayout.WEST);
         add(tilingPanel, BorderLayout.CENTER);
     }
 
-    private void updateButtonVisibility() {
-        boolean visible = (currentType == TileType.USER_MODE);
-        lineBtn.setVisible(visible);
-        fillBtn.setVisible(visible);
-        backBtn.setVisible(visible);
-        deleteBtn.setVisible(visible);
-        colorComboBox.setVisible(visible);
-        userBtn.setVisible(!visible);
+    private void updateUILayout() {
+        boolean isUserMode = (currentType == TileType.USER_MODE);
+        if (isUserMode)//resize not allowed in user mode
+            sizeSlider.setValue(150);
+        lineBtn.setVisible(isUserMode);
+        fillBtn.setVisible(isUserMode);
+        backBtn.setVisible(isUserMode);
+        deleteBtn.setVisible(isUserMode);
+        colorComboBox.setVisible(isUserMode);
+        helpBtn.setVisible(isUserMode);
+        galleryBtn.setVisible(!isUserMode);
+        userBtn.setVisible(!isUserMode);
+        sizeLabel.setEnabled(!isUserMode);
+        sizeSlider.setEnabled(!isUserMode);
         lineBtn.getParent().revalidate();
     }
 
@@ -242,6 +263,64 @@ public class SquareTiling extends JFrame {
         button.setPreferredSize(new Dimension(30, 30));
         button.addActionListener(l);
         return button;
+    }
+
+    private void showGallery(JComboBox<TileType> typeCombo) {
+        JDialog galleryDialog = new JDialog(this, "Tile Gallery", true);
+        galleryDialog.setUndecorated(false);
+        galleryDialog.setSize(tileSize * 3 + 100, tileSize * 2 + 100);
+        galleryDialog.setLocationRelativeTo(this);
+
+        JPanel gridPanel = new JPanel(new GridLayout(0, 3, 10, 10));
+        gridPanel.setBackground(Color.DARK_GRAY);
+        gridPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
+
+        for (TileType type : TileType.values()) {
+            if (type == TileType.USER_MODE && actionHistory.isEmpty()) continue;
+
+            JPanel tilePreview = new JPanel() {
+                @Override
+                protected void paintComponent(Graphics g) {
+                    super.paintComponent(g);
+                    Graphics2D g2d = (Graphics2D) g;
+                    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                    int size = Math.min(getWidth(), getHeight());
+
+                    drawTile(type, g2d, 0, 0, size);
+
+                    g2d.setColor(Color.GREEN);
+                    g2d.drawString(type.title, 10, 20);
+                }
+            };
+            tilePreview.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent me) {
+                    if (SwingUtilities.isLeftMouseButton(me)) {
+                        currentType = type;
+                        typeCombo.setSelectedItem(type);
+                        tilingPanel.clearCache();
+
+                        updateUILayout();
+                        repaint();
+
+                        galleryDialog.dispose();
+                    }
+                }
+
+                @Override
+                public void mouseEntered(MouseEvent me) {}
+
+                @Override
+                public void mouseExited(MouseEvent me) {}
+            });
+            tilePreview.setPreferredSize(new Dimension(tileSize, tileSize));
+            tilePreview.setBackground(Color.DARK_GRAY);
+            gridPanel.add(tilePreview);
+        }
+
+        galleryDialog.add(new JScrollPane(gridPanel));
+        galleryDialog.setVisible(true);
     }
 
     class TilingPanel extends JPanel {
@@ -253,21 +332,21 @@ public class SquareTiling extends JFrame {
             MouseAdapter ma = new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    if (!isUserMode || !SwingUtilities.isLeftMouseButton(e)) return;
+                    if (currentType != TileType.USER_MODE || !SwingUtilities.isLeftMouseButton(e)) return;
                     Point p = new Point(e.getX() % tileSize, e.getY() % tileSize);
                     if (isFillMode) performFill(p);
                     else { dragStart = p; currentEndPoint = p; }
                 }
                 @Override
                 public void mouseDragged(MouseEvent e) {
-                    if (isUserMode && !isFillMode && dragStart != null) {
+                    if (currentType == TileType.USER_MODE && !isFillMode && dragStart != null) {
                         currentEndPoint = new Point(e.getX() % tileSize, e.getY() % tileSize);
                         repaint();
                     }
                 }
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    if (isUserMode && !isFillMode && dragStart != null) {
+                    if (currentType == TileType.USER_MODE && !isFillMode && dragStart != null) {
                         Point p = new Point(e.getX() % tileSize, e.getY() % tileSize);
                         if (p.distance(dragStart) > 2) {
                             actionHistory.add(new LineAction(dragStart, p, colorB));
@@ -306,7 +385,7 @@ public class SquareTiling extends JFrame {
             Graphics2D g2d = cachedTile.createGraphics();
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
-            drawTile(g2d, 0, 0, tileSize);
+            drawTile(currentType, g2d, 0, 0, tileSize);
             g2d.dispose();
 
             tilingPaint = new TexturePaint(cachedTile, new Rectangle2D.Double(0, 0, tileSize, tileSize));
@@ -325,7 +404,7 @@ public class SquareTiling extends JFrame {
             g2d.setPaint(tilingPaint);
             g2d.fillRect(0, 0, getWidth(), getHeight());
 
-            if (isUserMode && !isFillMode && dragStart != null && currentEndPoint != null) {
+            if (currentType == TileType.USER_MODE && !isFillMode && dragStart != null && currentEndPoint != null) {
                 g2d.setColor(colorB);
                 g2d.setStroke(new BasicStroke(2f));
                 // Show the ghost line on all tiles simultaneously
@@ -362,8 +441,8 @@ public class SquareTiling extends JFrame {
         }
     }
 
-    private void drawTile(Graphics2D g2d, int x, int y, int size) {
-        switch (currentType) {
+    private void drawTile(TileType tile, Graphics2D g2d, int x, int y, int size) {
+        switch (tile) {
             case USER_MODE: drawUserTile(g2d, x, y, size); break;
             case GREEK: drawGreekTile(g2d, x, y, size); break;
             case IPATTERN1: drawIslamicStarTile1(g2d, x, y, size); break;
@@ -397,7 +476,7 @@ public class SquareTiling extends JFrame {
 
     private void drawGreekTile(Graphics2D g2d, int x, int y, int size) {
         g2d.setColor(colorC);
-        g2d.fillRect(x, y, x + size, y + size);
+        g2d.fillRect(x, y, size, size);
 
         double step = size / 8.0;
         double[][] path = {{0,1}, {1,1}, {1,7}, {6,7}, {6,4}, {5,4}, {5,6}, {2,6}, {2,1}, {8,1}, {8,2}, {3,2}, {3,5}, {4,5}, {4,3}, {7,3}, {7,8}, {0,8}};
@@ -426,7 +505,7 @@ public class SquareTiling extends JFrame {
     private void drawIslamicStarTile2(Graphics2D g2d, int x, int y, int size) {
         double cx = x + size / 2.0; double cy = y + size / 2.0;
         g2d.setColor(colorD);
-        g2d.fillRect(x, y, x + size, y + size);
+        g2d.fillRect(x, y, size, size);
 
         Path2D star = createStar(cx, cy, size * 0.27, size * 0.5, 8, 0);
         g2d.setColor(colorB); g2d.fill(star);
@@ -445,7 +524,7 @@ public class SquareTiling extends JFrame {
 
     private void drawIslamicStarTile3(Graphics2D g2d, int x, int y, int size) {
         g2d.setColor(colorB);
-        g2d.fillRect(x, y, x + size, y + size);
+        g2d.fillRect(x, y, size, size);
 
         double cx = x + size / 2.0; double cy = y + size / 2.0;
         float strokeSize = Math.max(1.5f, size / 80f); g2d.setStroke(new BasicStroke(strokeSize));
@@ -465,7 +544,7 @@ public class SquareTiling extends JFrame {
 
     private void drawCrossedTile(Graphics2D g2d, int x, int y, int size) {
         g2d.setColor(colorB);
-        g2d.fillRect(x, y, x + size, y + size);
+        g2d.fillRect(x, y, size, size);
 
         g2d.setStroke(new BasicStroke(Math.max(1, size / 30f)));
         g2d.setColor(colorA); g2d.drawLine(x, y, x + size, y + size); g2d.drawLine(x + size, y, x, y + size);
@@ -474,7 +553,7 @@ public class SquareTiling extends JFrame {
 
     private void drawInterlacedTile(Graphics2D g2d, int x, int y, int size) {
         g2d.setColor(colorB);
-        g2d.fillRect(x, y, x + size, y + size);
+        g2d.fillRect(x, y, size, size);
 
         g2d.setStroke(new BasicStroke(Math.max(1, size / 40f)));
         g2d.setColor(colorA); int r = size / 2;
@@ -485,7 +564,7 @@ public class SquareTiling extends JFrame {
 
     private void drawOctagramTile(Graphics2D g2d, int x, int y, double factor, int size) {
         g2d.setColor(colorB);
-        g2d.fillRect(x, y, x + size, y + size);
+        g2d.fillRect(x, y, size, size);
 
         double cx = x + size / 2.0; double cy = y + size / 2.0;
         Path2D star = createStar(cx, cy, size * factor, size * 0.5, 8, 0);
@@ -496,7 +575,7 @@ public class SquareTiling extends JFrame {
 
     private void drawOctagonTile(Graphics2D g2d, int x, int y, int size) {
         g2d.setColor(colorB);
-        g2d.fillRect(x, y, x + size, y + size);
+        g2d.fillRect(x, y, size, size);
 
         double cx = x + size / 2.0; double cy = y + size / 2.0;
         double d = 1.0 / (3.0 + Math.sqrt(2));
@@ -518,13 +597,13 @@ public class SquareTiling extends JFrame {
         for (int i = 0; i < 2; i++)
             for (int j = 0; j < 2; j++) {
                 g2d.setColor(i == j ? colorB : colorC);
-                g2d.fillRect(x + half * i, y + half * j, x + half + half * i, y + half + half * j);
+                g2d.fillRect(x + half * i, y + half * j, half, half);
             }
     }
 
     private void drawTartanTile(Graphics2D g2d, int x, int y, int size) {
         g2d.setColor(colorD);
-        g2d.fillRect(x, y, x + size, y + size);
+        g2d.fillRect(x, y, size, size);
 
         Color semiTransparentColorB = new Color(colorB.getRed(), colorB.getGreen(), colorB.getBlue(), 128);
 
@@ -542,7 +621,7 @@ public class SquareTiling extends JFrame {
 
     private void drawInterlockingTile(Graphics2D g2d, int x, int y, int size) {
         g2d.setColor(colorC);
-        g2d.fillRect(x, y, x + size, y + size);
+        g2d.fillRect(x, y, size, size);
 
         int stroke = size / 16;
         int stroke2 = stroke * 2;
@@ -607,7 +686,7 @@ public class SquareTiling extends JFrame {
 
     private void drawSquaresTile(Graphics2D g2d, int x, int y, int size) {
         g2d.setColor(colorB);
-        g2d.fillRect(x, y, x + size, y + size);
+        g2d.fillRect(x, y, size, size);
 
         double cx = x + size / 2.0; double cy = y + size / 2.0;
 
@@ -695,7 +774,7 @@ public class SquareTiling extends JFrame {
                 g2d.setColor(colorB);
                 g2d.fillRect(0, 0, getWidth(), getHeight());
                 int size = Math.min(getWidth(), getHeight());
-                drawTile(g2d, (getWidth() - size) / 2, (getHeight() - size) / 2, size);
+                drawTile(currentType, g2d, (getWidth() - size) / 2, (getHeight() - size) / 2, size);
             }
         };
         dialog.add(previewPanel);

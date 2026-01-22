@@ -16,3 +16,9 @@ Islamic tile example:
 
 **User mode** example:
 ![Screenshot](images/user_mode.png)
+
+# Todo
+- Extend tiling to rectangles
+- Extend user mode with arcs
+- Improve flood fill algorithm
+- Add more tiles

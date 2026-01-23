@@ -1,0 +1,386 @@
+package tiles;
+/*
+License Information, 2026 Livio (javalc6)
+
+Feel free to modify, re-use this software, please give appropriate
+credit by referencing this Github repository.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+IMPORTANT NOTICE
+Note that this software is freeware and it is not designed, licensed or
+intended for use in mission critical, life support and military purposes.
+The use of this software is at the risk of the user.
+
+DO NOT USE THIS SOFTWARE IF YOU DON'T AGREE WITH STATED CONDITIONS.
+*/
+import java.awt.*;
+import java.awt.geom.Arc2D;
+import java.awt.geom.Path2D;
+import java.awt.geom.Rectangle2D;
+import java.awt.geom.RoundRectangle2D;
+import java.awt.image.BufferedImage;
+
+public class Tiles {
+
+    public static void drawGreekTile(Graphics2D g2d, Color[] colors,int x, int y, int size) {
+        g2d.setColor(colors[2]);
+        g2d.fillRect(x, y, size, size);
+
+        double step = size / 8.0;
+        double[][] path = {{0,1}, {1,1}, {1,7}, {6,7}, {6,4}, {5,4}, {5,6}, {2,6}, {2,1}, {8,1}, {8,2}, {3,2}, {3,5}, {4,5}, {4,3}, {7,3}, {7,8}, {0,8}};
+        Path2D p = new Path2D.Double();
+        p.moveTo(step * path[0][0], step * path[0][1]);
+        for (int i = 1; i < path.length; i++)
+            p.lineTo(step * path[i][0], step * path[i][1]);
+        p.closePath();
+
+        g2d.setColor(colors[1]);
+        g2d.fill(p);
+        g2d.draw(p);
+    }
+
+    public static void drawIslamicStarTile1(Graphics2D g2d, Color[] colors,int x, int y, int size) {
+        drawOctagramTile(g2d, colors, x, y, 0.384, size);
+
+        double cx = x + size / 2.0; double cy = y + size / 2.0;
+        Path2D star = createStar(cx, cy, size * 0.287, size * 0.375, 8, Math.PI / 8);
+        g2d.setColor(colors[3]); g2d.fill(star);
+
+        star = createStar(cx, cy, size * 0.155, size * 0.287, 8, 0);
+        g2d.setColor(colors[1]); g2d.fill(star);
+    }
+
+    public static void drawIslamicStarTile2(Graphics2D g2d, Color[] colors,int x, int y, int size) {
+        double cx = x + size / 2.0; double cy = y + size / 2.0;
+        g2d.setColor(colors[3]);
+        g2d.fillRect(x, y, size, size);
+
+        Path2D star = createStar(cx, cy, size * 0.27, size * 0.5, 8, 0);
+        g2d.setColor(colors[1]); g2d.fill(star);
+
+        double r = size * 0.21;
+        Path2D[] stars = {
+            createStar(x, y, r * 0.5, r, 4, Math.PI/4), createStar(x + size, y, r * 0.5, r, 4, Math.PI/4),
+            createStar(x, y + size, r * 0.5, r, 4, Math.PI/4), createStar(x + size, y + size, r * 0.5, r, 4, Math.PI/4),
+        };
+        for (Path2D s : stars) { g2d.fill(s); g2d.draw(s); }
+
+        Path2D star2 = createStar(cx, cy, size * 0.207, size * 0.27, 8, Math.PI/8);
+        g2d.setColor(colors[0]); g2d.fill(star2);
+
+    }
+
+    public static void drawIslamicStarTile3(Graphics2D g2d, Color[] colors,int x, int y, int size) {
+        g2d.setColor(colors[1]);
+        g2d.fillRect(x, y, size, size);
+
+        double cx = x + size / 2.0; double cy = y + size / 2.0;
+        float strokeSize = Math.max(1.5f, size / 80f); g2d.setStroke(new BasicStroke(strokeSize));
+        g2d.setColor(colors[2]);
+        double r = size * 0.15;
+        Path2D[] stars = {
+            createStar(x, y, r * 0.5, r, 4, Math.PI/4), createStar(x + size, y, r * 0.5, r, 4, Math.PI/4),
+            createStar(x, y + size, r * 0.5, r, 4, Math.PI/4), createStar(x + size, y + size, r * 0.5, r, 4, Math.PI/4),
+            createStar(cx, y, r * 0.5, r, 4, 0), createStar(cx, y + size, r * 0.5, r, 4, 0),
+            createStar(x, cy, r * 0.5, r, 4, 0), createStar(x + size, cy, r * 0.5, r, 4, 0)
+        };
+        for (Path2D s : stars) { g2d.fill(s); g2d.draw(s); }
+        Path2D mainStar = createStar(cx, cy, size * 0.19, size * 0.35, 8, 0);
+        g2d.setColor(colors[0]); g2d.fill(mainStar);
+        g2d.setColor(colors[2]); g2d.draw(mainStar);
+    }
+
+    public static void drawCrossedTile(Graphics2D g2d, Color[] colors,int x, int y, int size) {
+        g2d.setColor(colors[1]);
+        g2d.fillRect(x, y, size, size);
+
+        g2d.setStroke(new BasicStroke(Math.max(1, size / 30f)));
+        g2d.setColor(colors[0]); g2d.drawLine(x, y, x + size, y + size); g2d.drawLine(x + size, y, x, y + size);
+        g2d.setColor(colors[2]); g2d.drawRect(x + size/4, y + size/4, size/2, size/2);
+    }
+
+    public static void drawInterlacedTile(Graphics2D g2d, Color[] colors,int x, int y, int size) {
+        g2d.setColor(colors[1]);
+        g2d.fillRect(x, y, size, size);
+
+        g2d.setStroke(new BasicStroke(Math.max(1, size / 40f)));
+        g2d.setColor(colors[0]); int r = size / 2;
+        g2d.drawArc(x - r, y - r, size, size, 0, -90); g2d.drawArc(x + r, y - r, size, size, 180, 90);
+        g2d.drawArc(x - r, y + r, size, size, 0, 90); g2d.drawArc(x + r, y + r, size, size, 180, -90);
+        g2d.setColor(colors[2]); g2d.drawOval(x, y, size, size);
+    }
+
+    public static void drawOctagramTile(Graphics2D g2d, Color[] colors,int x, int y, double factor, int size) {
+        g2d.setColor(colors[1]);
+        g2d.fillRect(x, y, size, size);
+
+        double cx = x + size / 2.0; double cy = y + size / 2.0;
+        Path2D star = createStar(cx, cy, size * factor, size * 0.5, 8, 0);
+        g2d.setColor(colors[0]); g2d.fill(star);
+        g2d.setColor(colors[2]); g2d.setStroke(new BasicStroke(Math.max(1, size / 60f)));
+        g2d.draw(star);
+    }
+
+    public static void drawOctagonTile(Graphics2D g2d, Color[] colors,int x, int y, int size) {
+        g2d.setColor(colors[1]);
+        g2d.fillRect(x, y, size, size);
+
+        double cx = x + size / 2.0; double cy = y + size / 2.0;
+        double d = 1.0 / (3.0 + Math.sqrt(2));
+        Path2D octagon = createPolygon(cx, cy, size * d, 8, 0);
+        g2d.setColor(colors[0]); g2d.fill(octagon);
+        g2d.draw(octagon);
+
+        double offset = d * (1.0 + 1.0 / Math.sqrt(2)) * size;
+        double[][] pos = {{0, offset}, {0, -offset}, {-offset, 0}, {offset, 0}};
+        for (int k = 0; k < 4; k++) {
+            Path2D square = createPolygon(cx + pos[k][0], cy + pos[k][1], size * d, 4, 0);
+            g2d.setColor(colors[3]); g2d.fill(square);
+            g2d.draw(square);
+        }
+    }
+
+    public static void drawCheckeredTile(Graphics2D g2d, Color[] colors,int x, int y, int size) {
+        int half = size / 2;
+        for (int i = 0; i < 2; i++)
+            for (int j = 0; j < 2; j++) {
+                g2d.setColor(i == j ? colors[1] : colors[2]);
+                g2d.fillRect(x + half * i, y + half * j, half, half);
+            }
+    }
+
+    public static void drawTartanTile(Graphics2D g2d, Color[] colors,int x, int y, int size) {
+        g2d.setColor(colors[3]);
+        g2d.fillRect(x, y, size, size);
+
+        Color semiTransparentcolor = new Color(colors[1].getRed(), colors[1].getGreen(), colors[1].getBlue(), 128);
+
+        int half = size / 2;
+        g2d.setColor(semiTransparentcolor);
+        g2d.fillRect(0, 0, half, size);
+        g2d.fillRect(0, 0, size, half);
+
+        int quarter = half / 2;
+        g2d.setColor(colors[0]);
+        g2d.setStroke(new BasicStroke(2));
+        g2d.drawLine(quarter, 0, quarter, size);
+        g2d.drawLine(0, quarter, size, quarter);
+    }
+
+    public static void drawInterlockingTile(Graphics2D g2d, Color[] colors,int x, int y, int size) {
+        g2d.setColor(colors[2]);
+        g2d.fillRect(x, y, size, size);
+
+        int stroke = size / 16;
+        int stroke2 = stroke * 2;
+        int stroke3 = stroke * 3;
+        int dim = size - stroke2 * 2;
+
+        g2d.setStroke(new BasicStroke(stroke));
+
+//vertical lines
+        g2d.setColor(colors[0]);
+        int x1 = dim / 2 + stroke;
+        int x2 = dim / 2 + stroke3;
+        g2d.drawLine(x1, 0, x1, size);
+        g2d.drawLine(x2, 0, x2, size);
+//horizontal lines
+        g2d.setColor(colors[3]);
+        int y1 = dim / 2 + stroke;
+        int y2 = dim / 2 + stroke3;
+        g2d.drawLine(0, y1, size, y1);
+        g2d.drawLine(0, y2, size, y2);
+
+        int arc = dim / 3;
+//rounded square
+        g2d.setColor(Color.RED);
+        RoundRectangle2D loop = new RoundRectangle2D.Double(stroke2, stroke2, dim, dim, arc, arc);
+        g2d.draw(loop);
+
+        int r = arc / 2;
+//bottom-left arc
+        g2d.setColor(colors[1]);
+        Arc2D quarter = new Arc2D.Double(stroke3 - r - 1, dim - r + stroke, arc, arc, 90, -90, Arc2D.OPEN);
+        g2d.draw(quarter);
+//bottom-right arc
+        quarter = new Arc2D.Double(stroke - r + dim, dim - r + stroke, arc, arc, 180, -90, Arc2D.OPEN);
+        g2d.draw(quarter);
+//top-right arc
+        quarter = new Arc2D.Double(stroke - r + dim, stroke3 - r, arc, arc, 270, -90, Arc2D.OPEN);
+        g2d.draw(quarter);
+//top-left arc
+        quarter = new Arc2D.Double(stroke3 - r, stroke3 - r, arc, arc, 0, -90, Arc2D.OPEN);
+        g2d.draw(quarter);
+//patches
+        g2d.drawLine(0, stroke3 + r, stroke2 + 1, stroke3 + r);
+        g2d.drawLine(0, dim - r + stroke, stroke, dim - r + stroke);
+        g2d.drawLine(stroke3 + r, 0, stroke3 + r, stroke);
+        g2d.drawLine(stroke3 + r, dim + stroke2, stroke3 + r, size);
+        g2d.drawLine(dim - stroke, 0, dim - stroke, stroke2 + 1);
+        g2d.drawLine(dim - stroke, dim + stroke3, dim - stroke, size);
+        g2d.drawLine(dim + stroke3, stroke3 + r, size, stroke3 + r);
+        g2d.drawLine(size, dim - r + stroke, dim + stroke2, dim - r + stroke);
+
+        g2d.setColor(colors[0]);
+        g2d.drawLine(x1, stroke, x1, stroke3);
+        g2d.drawLine(x1, y2, x1, y2 + stroke);
+        g2d.drawLine(x2, dim + stroke, x2, dim + stroke3);
+        g2d.drawLine(x2, y1, x2, y1 + stroke);
+
+        g2d.setColor(colors[3]);
+        g2d.drawLine(dim, y1, dim + stroke3, y1);
+        g2d.drawLine(stroke, y2, stroke3, y2);
+    }
+
+    public static void drawSquaresTile(Graphics2D g2d, Color[] colors,int x, int y, int size) {
+        g2d.setColor(colors[1]);
+        g2d.fillRect(x, y, size, size);
+
+        double cx = x + size / 2.0; double cy = y + size / 2.0;
+
+        double a = Math.PI / 6;
+        double cosT = Math.cos(a);
+        double sinT = Math.sin(a);
+
+        double side = size / (2 * (cosT + sinT));
+        double offset = (side / 2.0) * (cosT + sinT);
+
+        g2d.setColor(colors[3]);
+        Path2D path = createSquare(cx - offset, cy - offset, side, a);
+        g2d.fill(path);
+        path = createSquare(cx + offset, cy - offset, side, -a);
+        g2d.fill(path);
+        path = createSquare(cx - offset, cy + offset, side, -a);
+        g2d.fill(path);
+        path = createSquare(cx + offset, cy + offset, side, a);
+        g2d.fill(path);
+    }
+
+    public static void drawBlockFractal(Graphics2D g2d, Color[] colors,int x, int y, int size) {
+        g2d.setColor(colors[2]);
+        g2d.fillRect(x, y, size, size);
+
+        int n = (int) (Math.log(size) / Math.log(3) - 1);
+        if (n < 1) n = 1;
+
+        g2d.setColor(colors[1]);
+        drawBlockFractal(g2d, x, y, size, n);
+    }
+
+    private static void drawBlockFractal(Graphics2D g2d, float x, float y, float size, int level) {
+        if (level > 0) {
+            float s3 = size / 3;
+            drawBlockFractal(g2d, x, y, s3, level - 1);
+            drawBlockFractal(g2d, x + 2 * s3, y, s3, level - 1);
+            drawBlockFractal(g2d, x + s3, y + s3, s3, level - 1);
+            drawBlockFractal(g2d, x, y + 2 * s3, s3, level - 1);
+            drawBlockFractal(g2d, x + 2 * s3, y + 2 * s3, s3, level - 1);
+        } else g2d.fillRect((int)x, (int)y, (int)size, (int)size);
+    }
+
+    public static void drawHilbertFractal(Graphics2D g2d, Color[] colors,int x, int y, int size) {
+        g2d.setColor(colors[2]);
+        g2d.fillRect(x, y, size, size);
+
+        int n = (int) (Math.log(size) / Math.log(2) - 4);
+        if (n < 1) n = 1;
+
+        double step = size / Math.pow(2, n);
+
+        g2d.setColor(colors[1]);
+        // start bottom-left, facing right
+        hilbert(g2d, n, 1, 0, step, x + step / 2, y + size - step / 2);
+    }
+
+    public static double[] hilbert(Graphics2D g2d, int level, int rot, int dir, double step, double x, double y) {
+// note: rot: +1 or -1; dir: 0=right, 1=up, 2=left, 3=down
+        if (level > 0) {
+            dir = (dir + rot) % 4;
+            double[] pos = hilbert(g2d, level - 1, -rot, dir, step, x, y);
+            pos = forward(g2d, dir, step, pos[0], pos[1]);
+            dir = (dir - rot + 4) % 4;
+            pos = hilbert(g2d, level - 1, rot, dir, step, pos[0], pos[1]);
+            pos = forward(g2d, dir, step, pos[0], pos[1]);
+            pos = hilbert(g2d, level - 1, rot, dir, step, pos[0], pos[1]);
+            dir = (dir - rot + 4) % 4;
+            pos = forward(g2d, dir, step, pos[0], pos[1]);
+            pos = hilbert(g2d, level - 1, -rot, dir, step, pos[0], pos[1]);
+            x = pos[0];
+            y = pos[1];
+        }
+        return new double[]{x, y};
+    }
+
+    private static double[] forward(Graphics2D g2d, int dir, double step, double x, double y) {
+        double nx = x, ny = y;
+        switch (dir) {
+            case 0: nx += step; break;
+            case 1: ny -= step; break;
+            case 2: nx -= step; break;
+            case 3: ny += step; break;
+        }
+        g2d.drawLine((int) x, (int) y, (int) nx, (int) ny);
+        return new double[]{nx, ny};
+    }
+
+    public static Path2D createStar(double cx, double cy, double in, double out, int pts, double rotation) {
+        Path2D p = new Path2D.Double();
+        for (int i = 0; i < 2 * pts; i++) {
+            double r = (i % 2 == 0) ? out : in;
+            double a = i * Math.PI / pts + rotation;
+            double px = cx + Math.cos(a) * r, py = cy + Math.sin(a) * r;
+            if (i == 0)
+                p.moveTo(px, py);
+            else p.lineTo(px, py);
+        }
+        p.closePath();
+        return p;
+    }
+
+    public static Path2D createPolygon(double cx, double cy, double side_length, int n_sides, double rotation) {
+        Path2D p = new Path2D.Double();
+        double r = side_length * 0.5 / Math.sin(Math.PI / n_sides);
+        rotation -= Math.PI / n_sides;
+        for (int i = 0; i < n_sides; i++) {
+            double a = 2.0 * i * Math.PI / n_sides + rotation;
+            double px = cx + Math.cos(a) * r, py = cy + Math.sin(a) * r;
+            if (i == 0)
+                p.moveTo(px, py);
+            else p.lineTo(px, py);
+        }
+        p.closePath();
+        return p;
+    }
+
+    public static Path2D createSquare(double cx, double cy, double s, double angle) {
+        double half = s / 2.0;
+        double[][] reference_corners = {{-half, -half}, { half, -half}, { half,  half}, {-half,  half}};
+
+        Path2D path = new Path2D.Double();
+
+        double cosA = Math.cos(angle);
+        double sinA = Math.sin(angle);
+        for (int i = 0; i < 4; i++) {
+            double relX = reference_corners[i][0];
+            double relY = reference_corners[i][1];
+
+            double x = cx + relX * cosA - relY * sinA;
+            double y = cy + relX * sinA + relY * cosA;
+
+            if (i == 0) path.moveTo(x, y);
+            else path.lineTo(x, y);
+        }
+        path.closePath();
+
+        return path;
+    }
+}

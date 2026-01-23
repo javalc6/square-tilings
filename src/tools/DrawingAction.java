@@ -1,3 +1,5 @@
+package tools;
+
 import java.awt.Graphics2D;
 
 public interface DrawingAction {

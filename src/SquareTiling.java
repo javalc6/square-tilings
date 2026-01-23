@@ -25,10 +25,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom.Arc2D;
-import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.io.File;
@@ -37,6 +34,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+
+import tiles.*;
+import tools.*;
 
 /**
  * Swing application to visualize square tilings.
@@ -53,15 +53,17 @@ public class SquareTiling extends JFrame {
         IPATTERN1("Layered Islamic Star"),
         IPATTERN2("Quartered Islamic Star"),
         IPATTERN3("Eightfold Islamic Star"),
-        CROSSED("Crossed Square"),
-        INTERLACED("Interlaced Circles"),
         INTERLOCK("Interlocking Squares"),
         OCTAGRAM1("Large Octagram"),
         OCTAGRAM2("Narrow Octagram"),
         OCTAGON("Octagon & Rectangles"),
         SQUARES("Squares and rhombus"),
-        CHECKERED("Checkered"),
-        TARTAN("Tartan");
+        TARTAN("Tartan"),
+        CROSSED("Crossed Square"),
+        INTERLACED("Interlaced Circles"),
+        BLCKFRCTL("Block fractal"),
+        HLBRTFRCTL("Hilbert fractal"),
+        CHECKERED("Checkered");
 
         final String title;
         TileType(String title) { this.title = title; }
@@ -70,11 +72,11 @@ public class SquareTiling extends JFrame {
 
     private static int tileSize = 150;
 
-    private Color colorA = new Color(255, 180, 0);  // Gold
-    private Color colorB = new Color(0, 20, 60); // Deep Blue
-    private Color colorC = Color.WHITE;
-    private Color colorD = new Color(0, 200, 210); // Cyan
-    private Color fillColor = colorA;
+    private static final Color[] colors = {new Color(255, 180, 0),   // Gold
+        new Color(0, 20, 60), // Deep Blue
+        Color.WHITE,
+        new Color(0, 200, 210)};// Cyan
+    private Color fillColor = colors[0];
     private final Color colorUserGrid = Color.GRAY;
 
     private final TilingPanel tilingPanel;
@@ -90,7 +92,7 @@ public class SquareTiling extends JFrame {
     private final JSlider sizeSlider;
 
     private boolean isFillMode = false;
-    private Color boundaryColor = Color.BLACK;
+    private final Color boundaryColor = Color.BLACK;
 
     // User Drawing Data
     private final List<DrawingAction> actionHistory = new ArrayList<>();
@@ -175,7 +177,6 @@ public class SquareTiling extends JFrame {
             );
         });
 
-        Color[] colors = {colorA, colorB, colorC, colorD};
         colorComboBox = new JComboBox<>(colors);
         colorComboBox.setRenderer(new ColorRenderer());
         colorComboBox.addActionListener(e -> {
@@ -220,10 +221,10 @@ public class SquareTiling extends JFrame {
         colorLabel.setBorder(new EmptyBorder(20, 0, 10, 0));
 
         JButton[] colorButtons = {
-            createColorButton(colorA, c -> colorA = c),
-            createColorButton(colorB, c -> colorB = c),
-            createColorButton(colorC, c -> colorC = c),
-            createColorButton(colorD, c -> colorD = c)
+            createColorButton(colors[0], c -> colors[0] = c),
+            createColorButton(colors[1], c -> colors[1] = c),
+            createColorButton(colors[2], c -> colors[2] = c),
+            createColorButton(colors[3], c -> colors[3] = c)
         };
 
         sidebar.add(sizeLabel);
@@ -406,7 +407,7 @@ public class SquareTiling extends JFrame {
             g2d.fillRect(0, 0, getWidth(), getHeight());
 
             if (currentType == TileType.USER_MODE && !isFillMode && dragStart != null && currentEndPoint != null) {
-                g2d.setColor(colorB);
+                g2d.setColor(colors[1]);
                 g2d.setStroke(new BasicStroke(2f));
                 // Show the ghost line on all tiles simultaneously
                 for (int y = 0; y < getHeight(); y += tileSize) {
@@ -445,25 +446,27 @@ public class SquareTiling extends JFrame {
     private void drawTile(TileType tile, Graphics2D g2d, int x, int y, int size) {
         switch (tile) {
             case USER_MODE: drawUserTile(g2d, x, y, size); break;
-            case GREEK: drawGreekTile(g2d, x, y, size); break;
-            case IPATTERN1: drawIslamicStarTile1(g2d, x, y, size); break;
-            case IPATTERN2: drawIslamicStarTile2(g2d, x, y, size); break;
-            case IPATTERN3: drawIslamicStarTile3(g2d, x, y, size); break;
-            case CROSSED: drawCrossedTile(g2d, x, y, size); break;
-            case INTERLACED: drawInterlacedTile(g2d, x, y, size); break;
-            case INTERLOCK: drawInterlockingTile(g2d, x, y, size); break;
-            case OCTAGRAM1: drawOctagramTile(g2d, x, y, 0.384, size); break;
-            case OCTAGRAM2: drawOctagramTile(g2d, x, y, 0.27, size); break;
-            case OCTAGON: drawOctagonTile(g2d, x, y, size); break;
-            case CHECKERED: drawCheckeredTile(g2d, x, y, size); break;
-            case TARTAN: drawTartanTile(g2d, x, y, size); break;
-            case SQUARES: drawSquaresTile(g2d, x, y, size); break;
+            case GREEK: Tiles.drawGreekTile(g2d, colors, x, y, size); break;
+            case IPATTERN1: Tiles.drawIslamicStarTile1(g2d, colors, x, y, size); break;
+            case IPATTERN2: Tiles.drawIslamicStarTile2(g2d, colors, x, y, size); break;
+            case IPATTERN3: Tiles.drawIslamicStarTile3(g2d, colors, x, y, size); break;
+            case CROSSED: Tiles.drawCrossedTile(g2d, colors, x, y, size); break;
+            case INTERLACED: Tiles.drawInterlacedTile(g2d, colors, x, y, size); break;
+            case INTERLOCK: Tiles.drawInterlockingTile(g2d, colors, x, y, size); break;
+            case BLCKFRCTL: Tiles.drawBlockFractal(g2d, colors, x, y, size); break;
+            case HLBRTFRCTL: Tiles.drawHilbertFractal(g2d, colors, x, y, size); break;
+            case OCTAGRAM1: Tiles.drawOctagramTile(g2d, colors, x, y, 0.384, size); break;
+            case OCTAGRAM2: Tiles.drawOctagramTile(g2d, colors, x, y, 0.27, size); break;
+            case OCTAGON: Tiles.drawOctagonTile(g2d, colors, x, y, size); break;
+            case CHECKERED: Tiles.drawCheckeredTile(g2d, colors, x, y, size); break;
+            case TARTAN: Tiles.drawTartanTile(g2d, colors, x, y, size); break;
+            case SQUARES: Tiles.drawSquaresTile(g2d, colors, x, y, size); break;
             default: break;
         }
     }
 
     private void drawUserTile(Graphics2D g2d, int x, int y, int size) {
-        g2d.setColor(colorC);
+        g2d.setColor(colors[2]);
         g2d.fillRect(x, y, size, size);
 
         g2d.setColor(colorUserGrid);
@@ -475,291 +478,6 @@ public class SquareTiling extends JFrame {
             action.draw(g2d, size, tileSize);
     }
 
-    private void drawGreekTile(Graphics2D g2d, int x, int y, int size) {
-        g2d.setColor(colorC);
-        g2d.fillRect(x, y, size, size);
-
-        double step = size / 8.0;
-        double[][] path = {{0,1}, {1,1}, {1,7}, {6,7}, {6,4}, {5,4}, {5,6}, {2,6}, {2,1}, {8,1}, {8,2}, {3,2}, {3,5}, {4,5}, {4,3}, {7,3}, {7,8}, {0,8}};
-        Path2D p = new Path2D.Double();
-        p.moveTo(step * path[0][0], step * path[0][1]);
-        for (int i = 1; i < path.length; i++)
-            p.lineTo(step * path[i][0], step * path[i][1]);
-        p.closePath();
-
-        g2d.setColor(colorB);
-        g2d.fill(p);
-        g2d.draw(p);
-    }
-
-    private void drawIslamicStarTile1(Graphics2D g2d, int x, int y, int size) {
-        drawOctagramTile(g2d, x, y, 0.384, size);
-
-        double cx = x + size / 2.0; double cy = y + size / 2.0;
-        Path2D star = createStar(cx, cy, size * 0.287, size * 0.375, 8, Math.PI / 8);
-        g2d.setColor(colorD); g2d.fill(star);
-
-        star = createStar(cx, cy, size * 0.155, size * 0.287, 8, 0);
-        g2d.setColor(colorB); g2d.fill(star);
-    }
-
-    private void drawIslamicStarTile2(Graphics2D g2d, int x, int y, int size) {
-        double cx = x + size / 2.0; double cy = y + size / 2.0;
-        g2d.setColor(colorD);
-        g2d.fillRect(x, y, size, size);
-
-        Path2D star = createStar(cx, cy, size * 0.27, size * 0.5, 8, 0);
-        g2d.setColor(colorB); g2d.fill(star);
-
-        double r = size * 0.21;
-        Path2D[] stars = {
-            createStar(x, y, r * 0.5, r, 4, Math.PI/4), createStar(x + size, y, r * 0.5, r, 4, Math.PI/4),
-            createStar(x, y + size, r * 0.5, r, 4, Math.PI/4), createStar(x + size, y + size, r * 0.5, r, 4, Math.PI/4),
-        };
-        for (Path2D s : stars) { g2d.fill(s); g2d.draw(s); }
-
-        Path2D star2 = createStar(cx, cy, size * 0.207, size * 0.27, 8, Math.PI/8);
-        g2d.setColor(colorA); g2d.fill(star2);
-
-    }
-
-    private void drawIslamicStarTile3(Graphics2D g2d, int x, int y, int size) {
-        g2d.setColor(colorB);
-        g2d.fillRect(x, y, size, size);
-
-        double cx = x + size / 2.0; double cy = y + size / 2.0;
-        float strokeSize = Math.max(1.5f, size / 80f); g2d.setStroke(new BasicStroke(strokeSize));
-        g2d.setColor(colorC);
-        double r = size * 0.15;
-        Path2D[] stars = {
-            createStar(x, y, r * 0.5, r, 4, Math.PI/4), createStar(x + size, y, r * 0.5, r, 4, Math.PI/4),
-            createStar(x, y + size, r * 0.5, r, 4, Math.PI/4), createStar(x + size, y + size, r * 0.5, r, 4, Math.PI/4),
-            createStar(cx, y, r * 0.5, r, 4, 0), createStar(cx, y + size, r * 0.5, r, 4, 0),
-            createStar(x, cy, r * 0.5, r, 4, 0), createStar(x + size, cy, r * 0.5, r, 4, 0)
-        };
-        for (Path2D s : stars) { g2d.fill(s); g2d.draw(s); }
-        Path2D mainStar = createStar(cx, cy, size * 0.19, size * 0.35, 8, 0);
-        g2d.setColor(colorA); g2d.fill(mainStar);
-        g2d.setColor(colorC); g2d.draw(mainStar);
-    }
-
-    private void drawCrossedTile(Graphics2D g2d, int x, int y, int size) {
-        g2d.setColor(colorB);
-        g2d.fillRect(x, y, size, size);
-
-        g2d.setStroke(new BasicStroke(Math.max(1, size / 30f)));
-        g2d.setColor(colorA); g2d.drawLine(x, y, x + size, y + size); g2d.drawLine(x + size, y, x, y + size);
-        g2d.setColor(colorC); g2d.drawRect(x + size/4, y + size/4, size/2, size/2);
-    }
-
-    private void drawInterlacedTile(Graphics2D g2d, int x, int y, int size) {
-        g2d.setColor(colorB);
-        g2d.fillRect(x, y, size, size);
-
-        g2d.setStroke(new BasicStroke(Math.max(1, size / 40f)));
-        g2d.setColor(colorA); int r = size / 2;
-        g2d.drawArc(x - r, y - r, size, size, 0, -90); g2d.drawArc(x + r, y - r, size, size, 180, 90);
-        g2d.drawArc(x - r, y + r, size, size, 0, 90); g2d.drawArc(x + r, y + r, size, size, 180, -90);
-        g2d.setColor(colorC); g2d.drawOval(x, y, size, size);
-    }
-
-    private void drawOctagramTile(Graphics2D g2d, int x, int y, double factor, int size) {
-        g2d.setColor(colorB);
-        g2d.fillRect(x, y, size, size);
-
-        double cx = x + size / 2.0; double cy = y + size / 2.0;
-        Path2D star = createStar(cx, cy, size * factor, size * 0.5, 8, 0);
-        g2d.setColor(colorA); g2d.fill(star);
-        g2d.setColor(colorC); g2d.setStroke(new BasicStroke(Math.max(1, size / 60f)));
-        g2d.draw(star);
-    }
-
-    private void drawOctagonTile(Graphics2D g2d, int x, int y, int size) {
-        g2d.setColor(colorB);
-        g2d.fillRect(x, y, size, size);
-
-        double cx = x + size / 2.0; double cy = y + size / 2.0;
-        double d = 1.0 / (3.0 + Math.sqrt(2));
-        Path2D octagon = createPolygon(cx, cy, size * d, 8, 0);
-        g2d.setColor(colorA); g2d.fill(octagon);
-        g2d.draw(octagon);
-
-        double offset = d * (1.0 + 1.0 / Math.sqrt(2)) * size;
-        double[][] pos = {{0, offset}, {0, -offset}, {-offset, 0}, {offset, 0}};
-        for (int k = 0; k < 4; k++) {
-            Path2D square = createPolygon(cx + pos[k][0], cy + pos[k][1], size * d, 4, 0);
-            g2d.setColor(colorD); g2d.fill(square);
-            g2d.draw(square);
-        }
-    }
-
-    private void drawCheckeredTile(Graphics2D g2d, int x, int y, int size) {
-        int half = size / 2;
-        for (int i = 0; i < 2; i++)
-            for (int j = 0; j < 2; j++) {
-                g2d.setColor(i == j ? colorB : colorC);
-                g2d.fillRect(x + half * i, y + half * j, half, half);
-            }
-    }
-
-    private void drawTartanTile(Graphics2D g2d, int x, int y, int size) {
-        g2d.setColor(colorD);
-        g2d.fillRect(x, y, size, size);
-
-        Color semiTransparentColorB = new Color(colorB.getRed(), colorB.getGreen(), colorB.getBlue(), 128);
-
-        int half = size / 2;
-        g2d.setColor(semiTransparentColorB);
-        g2d.fillRect(0, 0, half, size);
-        g2d.fillRect(0, 0, size, half);
-
-        int quarter = half / 2;
-        g2d.setColor(colorA);
-        g2d.setStroke(new BasicStroke(2));
-        g2d.drawLine(quarter, 0, quarter, size);
-        g2d.drawLine(0, quarter, size, quarter);
-    }
-
-    private void drawInterlockingTile(Graphics2D g2d, int x, int y, int size) {
-        g2d.setColor(colorC);
-        g2d.fillRect(x, y, size, size);
-
-        int stroke = size / 16;
-        int stroke2 = stroke * 2;
-        int stroke3 = stroke * 3;
-        int dim = size - stroke2 * 2;
-
-        g2d.setStroke(new BasicStroke(stroke));
-
-//vertical lines
-        g2d.setColor(colorA);
-        int x1 = dim / 2 + stroke;
-        int x2 = dim / 2 + stroke3;
-        g2d.drawLine(x1, 0, x1, size);
-        g2d.drawLine(x2, 0, x2, size);
-//horizontal lines
-        g2d.setColor(colorD);
-        int y1 = dim / 2 + stroke;
-        int y2 = dim / 2 + stroke3;
-        g2d.drawLine(0, y1, size, y1);
-        g2d.drawLine(0, y2, size, y2);
-
-        int arc = dim / 3;
-//rounded square
-        g2d.setColor(Color.RED);
-        RoundRectangle2D loop = new RoundRectangle2D.Double(stroke2, stroke2, dim, dim, arc, arc);
-        g2d.draw(loop);
-
-        int r = arc / 2;
-//bottom-left arc
-        g2d.setColor(colorB);
-        Arc2D quarter = new Arc2D.Double(stroke3 - r - 1, dim - r + stroke, arc, arc, 90, -90, Arc2D.OPEN);
-        g2d.draw(quarter);
-//bottom-right arc
-        quarter = new Arc2D.Double(stroke - r + dim, dim - r + stroke, arc, arc, 180, -90, Arc2D.OPEN);
-        g2d.draw(quarter);
-//top-right arc
-        quarter = new Arc2D.Double(stroke - r + dim, stroke3 - r, arc, arc, 270, -90, Arc2D.OPEN);
-        g2d.draw(quarter);
-//top-left arc
-        quarter = new Arc2D.Double(stroke3 - r, stroke3 - r, arc, arc, 0, -90, Arc2D.OPEN);
-        g2d.draw(quarter);
-//patches
-        g2d.drawLine(0, stroke3 + r, stroke2 + 1, stroke3 + r);
-        g2d.drawLine(0, dim - r + stroke, stroke, dim - r + stroke);
-        g2d.drawLine(stroke3 + r, 0, stroke3 + r, stroke);
-        g2d.drawLine(stroke3 + r, dim + stroke2, stroke3 + r, size);
-        g2d.drawLine(dim - stroke, 0, dim - stroke, stroke2 + 1);
-        g2d.drawLine(dim - stroke, dim + stroke3, dim - stroke, size);
-        g2d.drawLine(dim + stroke3, stroke3 + r, size, stroke3 + r);
-        g2d.drawLine(size, dim - r + stroke, dim + stroke2, dim - r + stroke);
-
-        g2d.setColor(colorA);
-        g2d.drawLine(x1, stroke, x1, stroke3);
-        g2d.drawLine(x1, y2, x1, y2 + stroke);
-        g2d.drawLine(x2, dim + stroke, x2, dim + stroke3);
-        g2d.drawLine(x2, y1, x2, y1 + stroke);
-
-        g2d.setColor(colorD);
-        g2d.drawLine(dim, y1, dim + stroke3, y1);
-        g2d.drawLine(stroke, y2, stroke3, y2);
-    }
-
-    private void drawSquaresTile(Graphics2D g2d, int x, int y, int size) {
-        g2d.setColor(colorB);
-        g2d.fillRect(x, y, size, size);
-
-        double cx = x + size / 2.0; double cy = y + size / 2.0;
-
-        double a = Math.PI / 6;
-        double cosT = Math.cos(a);
-        double sinT = Math.sin(a);
-
-        double side = size / (2 * (cosT + sinT));
-        double offset = (side / 2.0) * (cosT + sinT);
-
-        g2d.setColor(colorD);
-        Path2D path = createSquare(cx - offset, cy - offset, side, a);
-        g2d.fill(path);
-        path = createSquare(cx + offset, cy - offset, side, -a);
-        g2d.fill(path);
-        path = createSquare(cx - offset, cy + offset, side, -a);
-        g2d.fill(path);
-        path = createSquare(cx + offset, cy + offset, side, a);
-        g2d.fill(path);
-    }
-
-    private Path2D createStar(double cx, double cy, double in, double out, int pts, double rotation) {
-        Path2D p = new Path2D.Double();
-        for (int i = 0; i < 2 * pts; i++) {
-            double r = (i % 2 == 0) ? out : in;
-            double a = i * Math.PI / pts + rotation;
-            double px = cx + Math.cos(a) * r, py = cy + Math.sin(a) * r;
-            if (i == 0)
-                p.moveTo(px, py);
-            else p.lineTo(px, py);
-        }
-        p.closePath();
-        return p;
-    }
-
-    private Path2D createPolygon(double cx, double cy, double side_length, int n_sides, double rotation) {
-        Path2D p = new Path2D.Double();
-        double r = side_length * 0.5 / Math.sin(Math.PI / n_sides);
-        rotation -= Math.PI / n_sides;
-        for (int i = 0; i < n_sides; i++) {
-            double a = 2.0 * i * Math.PI / n_sides + rotation;
-            double px = cx + Math.cos(a) * r, py = cy + Math.sin(a) * r;
-            if (i == 0)
-                p.moveTo(px, py);
-            else p.lineTo(px, py);
-        }
-        p.closePath();
-        return p;
-    }
-
-    private Path2D createSquare(double cx, double cy, double s, double angle) {
-        double half = s / 2.0;
-        double[][] reference_corners = {{-half, -half}, { half, -half}, { half,  half}, {-half,  half}};
-
-        Path2D path = new Path2D.Double();
-
-        double cosA = Math.cos(angle);
-        double sinA = Math.sin(angle);
-        for (int i = 0; i < 4; i++) {
-            double relX = reference_corners[i][0];
-            double relY = reference_corners[i][1];
-
-            double x = cx + relX * cosA - relY * sinA;
-            double y = cy + relX * sinA + relY * cosA;
-
-            if (i == 0) path.moveTo(x, y);
-            else path.lineTo(x, y);
-        }
-        path.closePath();
-
-        return path;
-    }
 
     private void showSingleTile() {
         JDialog dialog = new JDialog(this, currentType.title, true);
@@ -772,7 +490,7 @@ public class SquareTiling extends JFrame {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g;
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2d.setColor(colorB);
+                g2d.setColor(colors[1]);
                 g2d.fillRect(0, 0, getWidth(), getHeight());
                 int size = Math.min(getWidth(), getHeight());
                 drawTile(currentType, g2d, (getWidth() - size) / 2, (getHeight() - size) / 2, size);

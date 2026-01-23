@@ -1,7 +1,7 @@
 # Introduction
 The *SquareTiling* application provides an interactive graphical interface for visualizing periodic tilings composed of repeated square-based geometric patterns. 
 
-*SquareTiling* includes tiles like Greek key, Islamic stars, octagons, checkers, fractals, tartan and interlaced motifs, which can be tiled across the application panel in real time. 
+*SquareTiling* includes tiles like Greek key, Islamic stars, octagons, checkers, fractals, Truchet patterns, tartan and interlaced motifs, which can be tiled across the application panel in real time. 
 
 You can adjust tile size, choose from four customizable colors, preview individual tiles and export the resulting tiling as a PNG image. 
 
@@ -16,6 +16,9 @@ Islamic tile example:
 
 **User mode** example:
 ![Screenshot](images/user_mode.png)
+
+**Tiles gallery**:
+![Screenshot](images/gallery.png)
 
 # Todo
 - Extend tiling to rectangles

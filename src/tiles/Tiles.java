@@ -24,6 +24,7 @@ DO NOT USE THIS SOFTWARE IF YOU DON'T AGREE WITH STATED CONDITIONS.
 */
 import java.awt.*;
 import java.awt.geom.Arc2D;
+import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
@@ -118,6 +119,54 @@ public class Tiles {
         g2d.drawArc(x - r, y + r, size, size, 0, 90); g2d.drawArc(x + r, y + r, size, size, 180, -90);
         g2d.setColor(colors[2]); g2d.drawOval(x, y, size, size);
     }
+
+    public static void drawLabyrinthTile(Graphics2D g2d, Color[] colors, int x, int y, int size) {
+        g2d.setColor(colors[0]);
+        g2d.fillRect(x, y, size, size);
+
+		java.util.Random random = new java.util.Random(0);
+
+		float cellSize = size / 10f;
+
+        g2d.setColor(colors[1]);
+        for (float i = x; i < x + size; i += cellSize) {
+            for (float j = y; j < y + size; j += cellSize) {                
+                if (random.nextBoolean()) {
+					g2d.draw(new Line2D.Double(i, j, (i + cellSize), (j + cellSize)));
+                } else {
+					g2d.draw(new Line2D.Double(i, (j + cellSize), (i + cellSize), j));
+                }
+            }
+        }
+	}
+
+	public static void drawTruchetTile(Graphics2D g2d, Color[] colors, int x, int y, int size, int type) {//type: 2 or 3
+        g2d.setColor(colors[0]);
+        g2d.fillRect(x, y, size, size);
+
+		java.util.Random random = new java.util.Random(0);
+
+		float cellSize = size / 10f;
+
+        g2d.setColor(colors[1]);
+        for (float i = x; i < x + size; i += cellSize) {
+            for (float j = y; j < y + size; j += cellSize) {
+				int idx = random.nextInt(type);
+                if (idx == 0 || idx == 3) {
+					g2d.draw(new Arc2D.Double(i + cellSize / 2, j - cellSize / 2, cellSize, cellSize, 180, 90, Arc2D.OPEN));
+					g2d.draw(new Arc2D.Double(i - cellSize / 2, j + cellSize / 2, cellSize, cellSize, 0, 90, Arc2D.OPEN));
+                }
+				if (idx == 1 || idx == 3) {
+					g2d.draw(new Arc2D.Double(i - cellSize / 2, j - cellSize / 2, cellSize, cellSize, 270, 90, Arc2D.OPEN));
+					g2d.draw(new Arc2D.Double(i + cellSize / 2, j + cellSize / 2, cellSize, cellSize, 90, 90, Arc2D.OPEN));
+                }
+				if (idx == 2) {
+					g2d.draw(new Line2D.Double(i, (j + cellSize / 2), (i + cellSize), (j + cellSize / 2)));
+					g2d.draw(new Line2D.Double((i + cellSize / 2), (j + cellSize), (i + cellSize / 2), j));
+                }
+            }
+        }
+	}
 
     public static void drawOctagramTile(Graphics2D g2d, Color[] colors,int x, int y, double factor, int size) {
         g2d.setColor(colors[1]);

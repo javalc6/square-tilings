@@ -61,6 +61,10 @@ public class SquareTiling extends JFrame {
         TARTAN("Tartan"),
         CROSSED("Crossed Square"),
         INTERLACED("Interlaced Circles"),
+		LABYRINTH("Labyrinth  pattern"),
+        TRUCHET2("Truchet pattern #2"),
+        TRUCHET3("Truchet pattern #3"),
+        TRUCHET4("Truchet pattern #4"),
         BLCKFRCTL("Block fractal"),
         HLBRTFRCTL("Hilbert fractal"),
         CHECKERED("Checkered");
@@ -452,6 +456,10 @@ public class SquareTiling extends JFrame {
             case IPATTERN3: Tiles.drawIslamicStarTile3(g2d, colors, x, y, size); break;
             case CROSSED: Tiles.drawCrossedTile(g2d, colors, x, y, size); break;
             case INTERLACED: Tiles.drawInterlacedTile(g2d, colors, x, y, size); break;
+            case TRUCHET2: Tiles.drawTruchetTile(g2d, colors, x, y, size, 2); break;
+            case TRUCHET3: Tiles.drawTruchetTile(g2d, colors, x, y, size, 3); break;
+            case TRUCHET4: Tiles.drawTruchetTile(g2d, colors, x, y, size, 4); break;
+            case LABYRINTH: Tiles.drawLabyrinthTile(g2d, colors, x, y, size); break;
             case INTERLOCK: Tiles.drawInterlockingTile(g2d, colors, x, y, size); break;
             case BLCKFRCTL: Tiles.drawBlockFractal(g2d, colors, x, y, size); break;
             case HLBRTFRCTL: Tiles.drawHilbertFractal(g2d, colors, x, y, size); break;

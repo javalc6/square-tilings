@@ -29,6 +29,8 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Random;
 
 public class Tiles {
 
@@ -124,49 +126,106 @@ public class Tiles {
         g2d.setColor(colors[0]);
         g2d.fillRect(x, y, size, size);
 
-		java.util.Random random = new java.util.Random(0);
+        Random random = new Random(0);
 
-		float cellSize = size / 10f;
+        float cellSize = size / 10f;
 
         g2d.setColor(colors[1]);
         for (float i = x; i < x + size; i += cellSize) {
             for (float j = y; j < y + size; j += cellSize) {                
                 if (random.nextBoolean()) {
-					g2d.draw(new Line2D.Double(i, j, (i + cellSize), (j + cellSize)));
+                    g2d.draw(new Line2D.Double(i, j, (i + cellSize), (j + cellSize)));
                 } else {
-					g2d.draw(new Line2D.Double(i, (j + cellSize), (i + cellSize), j));
+                    g2d.draw(new Line2D.Double(i, (j + cellSize), (i + cellSize), j));
                 }
             }
         }
-	}
+    }
 
-	public static void drawTruchetTile(Graphics2D g2d, Color[] colors, int x, int y, int size, int type) {//type: 2 or 3
+    public static void drawTruchetTile(Graphics2D g2d, Color[] colors, int x, int y, int size, int type) {//type: 2 or 3
         g2d.setColor(colors[0]);
         g2d.fillRect(x, y, size, size);
 
-		java.util.Random random = new java.util.Random(0);
+        Random random = new Random(0);
 
-		float cellSize = size / 10f;
+        float cellSize = size / 10f;
 
         g2d.setColor(colors[1]);
         for (float i = x; i < x + size; i += cellSize) {
             for (float j = y; j < y + size; j += cellSize) {
-				int idx = random.nextInt(type);
+                int idx = random.nextInt(type);
                 if (idx == 0 || idx == 3) {
-					g2d.draw(new Arc2D.Double(i + cellSize / 2, j - cellSize / 2, cellSize, cellSize, 180, 90, Arc2D.OPEN));
-					g2d.draw(new Arc2D.Double(i - cellSize / 2, j + cellSize / 2, cellSize, cellSize, 0, 90, Arc2D.OPEN));
+                    g2d.draw(new Arc2D.Double(i + cellSize / 2, j - cellSize / 2, cellSize, cellSize, 180, 90, Arc2D.OPEN));
+                    g2d.draw(new Arc2D.Double(i - cellSize / 2, j + cellSize / 2, cellSize, cellSize, 0, 90, Arc2D.OPEN));
                 }
-				if (idx == 1 || idx == 3) {
-					g2d.draw(new Arc2D.Double(i - cellSize / 2, j - cellSize / 2, cellSize, cellSize, 270, 90, Arc2D.OPEN));
-					g2d.draw(new Arc2D.Double(i + cellSize / 2, j + cellSize / 2, cellSize, cellSize, 90, 90, Arc2D.OPEN));
+                if (idx == 1 || idx == 3) {
+                    g2d.draw(new Arc2D.Double(i - cellSize / 2, j - cellSize / 2, cellSize, cellSize, 270, 90, Arc2D.OPEN));
+                    g2d.draw(new Arc2D.Double(i + cellSize / 2, j + cellSize / 2, cellSize, cellSize, 90, 90, Arc2D.OPEN));
                 }
-				if (idx == 2) {
-					g2d.draw(new Line2D.Double(i, (j + cellSize / 2), (i + cellSize), (j + cellSize / 2)));
-					g2d.draw(new Line2D.Double((i + cellSize / 2), (j + cellSize), (i + cellSize / 2), j));
+                if (idx == 2) {
+                    g2d.draw(new Line2D.Double(i, (j + cellSize / 2), (i + cellSize), (j + cellSize / 2)));
+                    g2d.draw(new Line2D.Double((i + cellSize / 2), (j + cellSize), (i + cellSize / 2), j));
                 }
             }
         }
-	}
+    }
+
+    public static void drawWangTile(Graphics2D g2d, Color[] colors,int x, int y, int size) {
+        int gridSize = 8;
+        double tileSize = (double)size / gridSize;
+        int[][][] grid = generateWangTiling(gridSize);
+        for (int row = 0; row < gridSize; row++)
+            for (int col = 0; col < gridSize; col++)
+                drawWangSingleTile(g2d, colors, col * tileSize, row * tileSize, grid[row][col], tileSize);
+    }
+
+    private static void drawWangSingleTile(Graphics2D g2d, Color[] colors, double x, double y, int[] tile, double tileSize) {
+        double mid = tileSize * 0.5;
+
+        g2d.setColor(colors[tile[1]]);
+        Path2D path = createTriangle(x, y, x + mid, y + mid, x + tileSize, y);
+        g2d.fill(path);
+        g2d.setColor(colors[tile[0]]);
+        path = createTriangle(x + tileSize, y, x + mid, y + mid, x + tileSize, y + tileSize);
+        g2d.fill(path);
+        g2d.setColor(colors[tile[3]]);
+        path = createTriangle(x, y + tileSize, x + mid, y + mid, x + tileSize, y + tileSize);
+        g2d.fill(path);
+        g2d.setColor(colors[tile[2]]);
+        path = createTriangle(x, y, x + mid, y + mid, x, y + tileSize);
+        g2d.fill(path);
+    }
+
+    private static int[][][] generateWangTiling(int gridSize) {
+        Random random = new Random(0);
+
+        int n = 2;
+        int[][] tileSet = new int[n * n * n * n][];
+        int i = 0;
+//0=right, 1=top, 2=left, 3=bottom
+        for (int t = 0; t < n; t++)
+            for (int r = 0; r < n; r++)
+                for (int b = 0; b < n; b++)
+                    for (int l = 0; l < n; l++)
+                        tileSet[i++] = new int[]{t, r, b, l};
+
+        int[][][] grid = new int[gridSize][gridSize][4];
+        for (int row = 0; row < gridSize; row++) {
+            for (int col = 0; col < gridSize; col++) {
+                int topConstraint = row > 0 ? grid[row - 1][col][3] : random.nextInt(n);
+                int leftConstraint = col > 0 ? grid[row][col - 1][0] : random.nextInt(n);
+                Integer rightConstraint = (col == gridSize - 1) ? grid[row][0][2] : null;
+                Integer bottomConstraint = (row == gridSize - 1) ? grid[0][col][1] : null;
+
+                ArrayList<int[]> validTiles = new ArrayList<>();
+                for (int[] t : tileSet)
+                    if (t[1] == topConstraint && t[2] == leftConstraint && (rightConstraint == null || t[0] == rightConstraint) && (bottomConstraint == null || t[3] == bottomConstraint))
+                        validTiles.add(t);
+                grid[row][col] = validTiles.get(random.nextInt(validTiles.size()));
+            }
+        }
+        return grid;
+    }
 
     public static void drawOctagramTile(Graphics2D g2d, Color[] colors,int x, int y, double factor, int size) {
         g2d.setColor(colors[1]);
@@ -432,4 +491,16 @@ public class Tiles {
 
         return path;
     }
+
+    private static Path2D.Double createTriangle(double ax, double ay, double bx, double by, double cx, double cy) {
+        Path2D.Double path = new Path2D.Double();
+
+        path.moveTo(ax, ay);
+        path.lineTo(bx, by);
+        path.lineTo(cx, cy);
+        path.closePath();
+
+        return path;
+    }
+
 }

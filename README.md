@@ -23,8 +23,20 @@ Islamic tile example:
 
 ![Screenshot](images/gallery.png)
 
-# Todo
-- Extend tiling to rectangles
-- Extend user mode with arcs
-- Improve flood fill algorithm
-- Add more tiles
+# Tilings
+- Greek Pattern
+- Layered/Quartered/Eightfold Islamic Stars
+- Interlocking Squares
+- Large and Narrow Octagram
+- Octagons & Squares
+- Octagon & Rhombus
+- Squares and Rhombus
+- Tartan
+- Crossed Square
+- Interlaced Circles
+- Labyrinth  pattern
+- Truchet pattern #2, #3, #4
+- Wang tiling
+- Block and Hilbert fractal
+- Grid Squares & Circles
+- Checkered

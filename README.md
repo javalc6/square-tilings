@@ -5,7 +5,7 @@ The *SquareTiling* application provides an interactive graphical interface to vi
 
 You can adjust tile size, choose from four customizable colors, preview individual tiles, export the resulting tiling as a PNG image and view the gallery of implemented tiles. All tiles are implemented using standard Java 2D classes.
 
-Create your own tile using **user mode** that allows you to draw lines, fill colors, build and visualize your own tilings in real time.
+Create your own tile using **user mode** that allows you to draw lines and arcs, fill colors, build and visualize your own tilings in real time.
 
 # How to run
 Run 'ant' command to compile and run the *SquareTiling* application.
@@ -46,7 +46,7 @@ The following tilings are available:
 | `drawCheckeredTile` | Checkered |
 
 
-# Usage
+# How to use methods from other Java AWT apps
 Methods described in previous sections requires Java AWT. These methods are static and can be invoked as in the following example:
 ```java
 Tiles.drawGreekTile(g2d, colors, x, y, size);

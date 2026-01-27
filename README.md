@@ -40,10 +40,11 @@ The following tilings are available:
 | `drawLabyrinthTile` | Labyrinth  pattern |
 | `drawTruchetTile` | Truchet pattern #2, #3, #4 |
 | `drawWangTile` | Wang tiling |
-| `drawBlockFractal` | Block fractal |
-| `drawHilbertFractal` | Hilbert fractal |
+| `drawBlockFractal` | Block Fractal |
+| `drawHilbertFractal` | Hilbert Fractal |
 | `drawGridSquareCircles` | Grid Squares & Circles |
-| `drawCheckeredTile` | Checkered |
+| `drawCheckeredTile` | Square Spiral |
+| `drawSquareSpiralTile` | Checkered |
 
 
 # How to use methods from other Java AWT apps

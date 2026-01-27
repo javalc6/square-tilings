@@ -32,6 +32,16 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Random;
 
+/* 
+Class 'Tiles' provides static methods to generate a tiling, e.g. to create a Greek Tile use following:
+
+Tiles.drawGreekTile(g2d, colors, x, y, size);
+
+Where g2d is a reference to Graphics2D, x and y are the origin for the tile, size is the size of square tile. 
+Some methods may have additional parameters to control specific features of the tile.
+
+*/
+
 public class Tiles {
 
     public static void drawGreekTile(Graphics2D g2d, Color[] colors,int x, int y, int size) {
@@ -93,7 +103,7 @@ public class Tiles {
 		g2d.setClip(boundary);
 
         double cx = x + size / 2.0; double cy = y + size / 2.0;
-        float strokeSize = Math.max(1.5f, size / 80f); g2d.setStroke(new BasicStroke(strokeSize));
+        g2d.setStroke(new BasicStroke(Math.max(1.5f, size / 80f)));
         g2d.setColor(colors[2]);
         double r = size * 0.15;
         Path2D[] stars = {
@@ -296,7 +306,7 @@ public class Tiles {
         int stroke3 = stroke * 3;
         int dim = size - stroke2 * 2;
 
-        g2d.setStroke(new BasicStroke(stroke));
+        g2d.setStroke(new BasicStroke(Math.max(1, stroke)));
 
 //vertical lines
         g2d.setColor(colors[0]);
@@ -494,7 +504,32 @@ public class Tiles {
         }
 	}
 
-    public static Path2D createStar(double cx, double cy, double in, double out, int pts, double rotation) {
+    public static void drawSquareSpiralTile(Graphics2D g2d, Color[] colors,int x, int y, int size, int increment) {
+        g2d.setColor(colors[2]);
+        g2d.fillRect(x, y, size, size);
+
+        g2d.setStroke(new BasicStroke(Math.max(1, increment)));
+
+        x += size / 2;
+        y += size / 2;
+        int side = increment;
+        int turns = size / increment - 1;
+
+        g2d.setColor(colors[1]);
+        for (int i = 0; i < turns; i++) {
+            float hue = (float) i / turns;
+
+            switch (i % 4) {
+                case 0: g2d.drawLine(x, y, x + side, y); x += side; break;
+                case 1: g2d.drawLine(x, y, x, y + side); y += side; break;
+                case 2: g2d.drawLine(x, y, x - side, y); x -= side; break;
+                case 3: g2d.drawLine(x, y, x, y - side); y -= side; break;
+            }
+            side += increment;
+        }
+	}
+	
+	public static Path2D createStar(double cx, double cy, double in, double out, int pts, double rotation) {
         Path2D p = new Path2D.Double();
         for (int i = 0; i < 2 * pts; i++) {
             double r = (i % 2 == 0) ? out : in;

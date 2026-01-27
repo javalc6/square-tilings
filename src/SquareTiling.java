@@ -67,9 +67,10 @@ public class SquareTiling extends JFrame {
         TRUCHET3("Truchet pattern #3"),
         TRUCHET4("Truchet pattern #4"),
         WANG("Wang tiling"),
-        BLCKFRCTL("Block fractal"),
-        HLBRTFRCTL("Hilbert fractal"),
+        BLCKFRCTL("Block Fractal"),
+        HLBRTFRCTL("Hilbert Fractal"),
         GRIDSQRCIRCLE("Grid Squares & Circles"),
+        SQRSPIRAL("Square Spiral"),
         CHECKERED("Checkered");
 
         final String title;
@@ -498,24 +499,25 @@ public class SquareTiling extends JFrame {
             case IPATTERN1: Tiles.drawIslamicStarTile1(g2d, colors, x, y, size); break;
             case IPATTERN2: Tiles.drawIslamicStarTile2(g2d, colors, x, y, size); break;
             case IPATTERN3: Tiles.drawIslamicStarTile3(g2d, colors, x, y, size); break;
-            case CROSSED: Tiles.drawCrossedTile(g2d, colors, x, y, size); break;
-            case INTERLACED: Tiles.drawInterlacedTile(g2d, colors, x, y, size); break;
-            case TRUCHET2: Tiles.drawTruchetTile(g2d, colors, x, y, size, 2, size / 10.0); break;
-            case TRUCHET3: Tiles.drawTruchetTile(g2d, colors, x, y, size, 3, size / 10.0); break;
-            case TRUCHET4: Tiles.drawTruchetTile(g2d, colors, x, y, size, 4, size / 10.0); break;
-            case LABYRINTH: Tiles.drawLabyrinthTile(g2d, colors, x, y, size, size / 10.0); break;
-            case WANG: Tiles.drawWangTile(g2d, colors, x, y, size, 8); break;
             case INTERLOCK: Tiles.drawInterlockingTile(g2d, colors, x, y, size); break;
-            case BLCKFRCTL: Tiles.drawBlockFractal(g2d, colors, x, y, size, (int) (Math.log(size) / Math.log(3) - 1)); break;
-            case HLBRTFRCTL: Tiles.drawHilbertFractal(g2d, colors, x, y, size, (int) (Math.log(size) / Math.log(2) - 4)); break;
-            case GRIDSQRCIRCLE: Tiles.drawGridSquareCircles(g2d, colors, x, y, size, 6); break;
             case OCTAGRAM1: Tiles.drawOctagramTile(g2d, colors, x, y, size, 0.384); break;
             case OCTAGRAM2: Tiles.drawOctagramTile(g2d, colors, x, y, size, 0.27); break;
             case OCTAGON: Tiles.drawOctagonTile(g2d, colors, x, y, size, 1.0 / (2.0 + Math.sqrt(2))); break;
             case OCTAGON2: Tiles.drawOctagonTile(g2d, colors, x, y, size, 1.0 / (1.0 + Math.sqrt(2))); break;
-            case CHECKERED: Tiles.drawCheckeredTile(g2d, colors, x, y, size); break;
+			case SQUARES: Tiles.drawSquaresTile(g2d, colors, x, y, size); break;
             case TARTAN: Tiles.drawTartanTile(g2d, colors, x, y, size); break;
-            case SQUARES: Tiles.drawSquaresTile(g2d, colors, x, y, size); break;
+            case CROSSED: Tiles.drawCrossedTile(g2d, colors, x, y, size); break;
+            case INTERLACED: Tiles.drawInterlacedTile(g2d, colors, x, y, size); break;
+            case LABYRINTH: Tiles.drawLabyrinthTile(g2d, colors, x, y, size, size / 10.0); break;
+            case TRUCHET2: Tiles.drawTruchetTile(g2d, colors, x, y, size, 2, size / 10.0); break;
+            case TRUCHET3: Tiles.drawTruchetTile(g2d, colors, x, y, size, 3, size / 10.0); break;
+            case TRUCHET4: Tiles.drawTruchetTile(g2d, colors, x, y, size, 4, size / 10.0); break;
+            case WANG: Tiles.drawWangTile(g2d, colors, x, y, size, 8); break;
+            case BLCKFRCTL: Tiles.drawBlockFractal(g2d, colors, x, y, size, (int) (Math.log(size) / Math.log(3) - 1)); break;
+            case HLBRTFRCTL: Tiles.drawHilbertFractal(g2d, colors, x, y, size, (int) (Math.log(size) / Math.log(2) - 4)); break;
+            case GRIDSQRCIRCLE: Tiles.drawGridSquareCircles(g2d, colors, x, y, size, 6); break;
+            case SQRSPIRAL: Tiles.drawSquareSpiralTile(g2d, colors, x, y, size, 10); break;
+            case CHECKERED: Tiles.drawCheckeredTile(g2d, colors, x, y, size); break;
             default: break;
         }
     }

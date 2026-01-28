@@ -43,8 +43,9 @@ The following tilings are available:
 | `drawBlockFractal` | Block Fractal |
 | `drawHilbertFractal` | Hilbert Fractal |
 | `drawGridSquareCircles` | Grid Squares & Circles |
-| `drawCheckeredTile` | Square Spiral |
-| `drawSquareSpiralTile` | Checkered |
+| `drawSquareSpiralTile` | Square Spiral |
+| `drawSpiderWebTile` | Spider Web |
+| `drawCheckeredTile` | Checkered |
 
 
 # How to use methods from other Java AWT apps

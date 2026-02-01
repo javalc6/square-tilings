@@ -69,6 +69,7 @@ public class SquareTiling extends JFrame {
         WANG("Wang tiling"),
         BLCKFRCTL("Block Fractal"),
         HLBRTFRCTL("Hilbert Fractal"),
+        POLYGONFRCTL("Polygon Fractal"),
         GRIDSQRCIRCLE("Grid Squares & Circles"),
         SQRSPIRAL("Square Spiral"),
         SPIDERWEB("Spider Web"),
@@ -516,6 +517,7 @@ public class SquareTiling extends JFrame {
             case WANG: Tiles.drawWangTile(g2d, colors, x, y, size, 8); break;
             case BLCKFRCTL: Tiles.drawBlockFractal(g2d, colors, x, y, size, (int) (Math.log(size) / Math.log(3) - 1)); break;
             case HLBRTFRCTL: Tiles.drawHilbertFractal(g2d, colors, x, y, size, (int) (Math.log(size) / Math.log(2) - 4)); break;
+            case POLYGONFRCTL: Tiles.drawFractalPolygon(g2d, colors, x, y, size, 8, 3, 0.4); break;
             case GRIDSQRCIRCLE: Tiles.drawGridSquareCircles(g2d, colors, x, y, size, 6); break;
             case SQRSPIRAL: Tiles.drawSquareSpiralTile(g2d, colors, x, y, size, 10); break;
             case SPIDERWEB: Tiles.drawSpiderWebTile(g2d, colors, x, y, size, 16, 8); break;

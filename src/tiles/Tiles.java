@@ -26,6 +26,7 @@ import java.awt.*;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
@@ -451,6 +452,57 @@ public class Tiles {
         return new double[]{nx, ny};
     }
 
+    public static void drawFractalPolygon(Graphics2D g2d, Color[] colors, int x, int y, int size, int n_sides, int iterations, double reductionFactor) {
+        g2d.setColor(colors[2]);
+        g2d.fillRect(x, y, size, size);
+
+        int cx = x + size / 2;
+        int cy = y + size / 2;
+
+        drawPolygonFractal(g2d, colors, getRegularPolygon(cx, cy, size * 0.5, n_sides), iterations, reductionFactor);
+    }
+
+    private static void drawPolygonFractal(Graphics2D g2d, Color[] colors, ArrayList<Point2D> outer, int depth, double reductionFactor) {
+        if (depth == 0) return;
+
+		double sumX = 0, sumY = 0;
+        for (Point2D p : outer) {
+            sumX += p.getX();
+            sumY += p.getY();
+        }
+        Point2D center = new Point2D.Double(sumX / outer.size(), sumY / outer.size());
+        ArrayList<Point2D> inner = new ArrayList<>();
+        for (Point2D p : outer) {
+            double x = center.getX() + (p.getX() - center.getX()) * reductionFactor;
+            double y = center.getY() + (p.getY() - center.getY()) * reductionFactor;
+            inner.add(new Point2D.Double(x, y));
+        }
+
+        g2d.setColor(colors[1]); 
+        for (int i = 0; i < outer.size(); i++) {
+            Point2D p1 = outer.get(i);
+            Point2D p2 = inner.get(i);
+            g2d.drawLine((int) p1.getX(), (int) p1.getY(), (int) p2.getX(), (int) p2.getY());
+            
+            Point2D nextOuter = outer.get((i + 1) % outer.size());
+            Point2D nextInner = inner.get((i + 1) % inner.size());
+            g2d.drawLine((int) p1.getX(), (int) p1.getY(), (int) nextOuter.getX(), (int) nextOuter.getY());
+            g2d.drawLine((int) p2.getX(), (int) p2.getY(), (int) nextInner.getX(), (int) nextInner.getY());
+        }
+
+        drawPolygonFractal(g2d, colors, inner, depth - 1, reductionFactor);
+
+        for (int i = 0; i < outer.size(); i++) {
+            ArrayList<Point2D> trapezoid = new ArrayList<>();
+            trapezoid.add(outer.get(i));
+            trapezoid.add(outer.get((i + 1) % outer.size()));
+            trapezoid.add(inner.get((i + 1) % inner.size()));
+            trapezoid.add(inner.get(i));
+            
+            drawPolygonFractal(g2d, colors, trapezoid, depth - 1, reductionFactor);
+        }
+    }
+
     public static void drawGridSquareCircles(Graphics2D g2d, Color[] colors, int x, int y, int size, int n) {
         g2d.setColor(colors[3]);
         g2d.fillRect(x, y, size, size);
@@ -631,6 +683,15 @@ public class Tiles {
         path.closePath();
 
         return path;
+    }
+
+    private static ArrayList<Point2D> getRegularPolygon(double x, double y, double radius, int sides) {
+        ArrayList<Point2D> points = new ArrayList<>();
+        for (int i = 0; i < sides; i++) {
+            double angle = 2 * Math.PI * i / sides - Math.PI / 4; // Rotated for square orientation
+            points.add(new Point2D.Double(x + radius * Math.cos(angle), y + radius * Math.sin(angle)));
+        }
+        return points;
     }
 
 }

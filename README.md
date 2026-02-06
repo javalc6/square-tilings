@@ -45,6 +45,7 @@ The following tilings are available:
 | `drawHilbertFractal` | Hilbert Fractal |
 | `drawFractalPolygon` | Polygon Fractal |
 | `drawGridSquareCircles` | Grid Squares & Circles |
+| `drawDottedGridTile` | Dotted Grid |
 | `drawSquareSpiralTile` | Square Spiral |
 | `drawSpiderWebTile` | Spider Web |
 | `drawCheckeredTile` | Checkered |
